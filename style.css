@@ -1,0 +1,73 @@
+body{
+    
+    margin-right: 3vw;
+    margin-bottom: 3vw;
+    margin-top: 0;
+}
+
+.shadows-into-light-regular {
+    font-family: "Shadows Into Light", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.title{
+    text-align: center;
+    height: 400px;
+    font-size: 100px;
+}
+a{
+    color: black;
+    text-decoration: none;
+}
+.grid{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    margin-left: 0px;
+}
+
+.tile{
+    width: 500px;
+    height: 200px;
+    border: solid 2px black;
+    margin-bottom: 2.5vw;
+    position: relative;
+    place-self: center;
+    border-radius: 20px;
+    transition: 250ms;
+    background-image: none; /*draw an image for the bg*/
+}
+.name{
+    font-size: 50px;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tile:hover{
+    box-shadow: 0 0 15px rgb(255, 213, 213);
+    cursor:pointer;
+}
+
+.go-back{
+    height: 50px;
+    width: 170px;
+    
+    top: 1vh;
+    position: relative;
+    border: solid 2px black;
+    border-radius: 10px;
+    padding: 0px;
+    margin: 0px;
+    margin-left: 3vw;
+    z-index: 100;
+}
+
+.go-back h1{
+    position: absolute;
+    top: -10px;
+    font-size: 25px;
+    left: 15px;
+}
