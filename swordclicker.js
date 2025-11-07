@@ -13,15 +13,16 @@ var pointsPerClick = 1;
 
 var displayHeight = 900
 
+// rather than making enemy spawning random, make it happen once a minute. Add a countdown at the top (TIME UNTIL NEXT WAVE: x SECONDS)
 
 var Shop = {    //[name, cost, hasUnlocked, owned, total, points per sword/ * x points per click, swords per x seconds]
     SERVANT: ['servant', 20, false, 0, 5, 30, 10],
     MUD: ['mud', 100, false, 0, 1, 0, 0],
     BETTERSWORD:['better_sword', 100, false, 0, 1, 2],
     FIELD: ['field', 150, false, 0, 1, 0, 0],
-    COLLECTOR: ['collector', 200, false, 0, 1, 0, 0]
-    //have something that increases the swords produced by the servants for 300 swords
-    //increase the mud's length- 400
+    COLLECTOR: ['collector', 200, false, 0, 1, 0, 0],
+    FURNACE: ['furnace', 300, false, 0, 1, 0, 0]
+    //a cannon that does a bit of damage to the baloons- 400
     //autoclicker for sword- 500
 }
 
@@ -36,7 +37,7 @@ function shopButtonClicked(btnType){
         Shop.SERVANT[3] += 1
         Shop.SERVANT[1] *= 2
         const txt = document.getElementsByClassName(btnType + " shop-button-hover-text")[0]
-        txt.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords.<br /> Generates " + Shop.SERVANT[5] + " swords per " + Shop.SERVANT[6] + " seconds"
+        txt.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords.<br /> Generates " + Shop.SERVANT[5] + " swords per " + Shop.SERVANT[6] + " seconds <br />" + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
 
 
         if(Shop.SERVANT[3] == Shop.SERVANT[4]){
@@ -78,6 +79,16 @@ function shopButtonClicked(btnType){
         const button = document.getElementsByClassName(btnType + " shop-button")[0]
         button.remove()
     }
+    if((btnType == Shop.FURNACE[0]) && (points>=Shop.FURNACE[1])){
+        changePoints(-Shop.FURNACE[1])
+
+        Shop.FURNACE[3] += 1
+
+        Shop.SERVANT[5] += 20;
+        
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        button.remove()
+    }
 }
 
 function swordClicked(){
@@ -85,6 +96,11 @@ function swordClicked(){
 
     addParticle()
 
+    updateShop()
+    
+}
+
+function updateShop(){
     if((Shop.SERVANT[2] == false) && (Shop.SERVANT[1] <= highestPoints)){
         const btn = document.createElement('button')
         btn.className = Shop.SERVANT[0] + " shop-button can-purchase"
@@ -93,7 +109,7 @@ function swordClicked(){
 
         const text = document.createElement('div')
         text.className = Shop.SERVANT[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords.<br /> Generates " + Shop.SERVANT[5] + " swords per " + Shop.SERVANT[6] + " seconds"
+        text.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords.<br /> Generates " + Shop.SERVANT[5] + " swords per " + Shop.SERVANT[6] + " seconds <br />" + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.SERVANT[2] = true
@@ -154,12 +170,26 @@ function swordClicked(){
         shopDiv.appendChild(btn)
         Shop.COLLECTOR[2] = true
     }
+    if( (Shop.FURNACE[2] == false) && (Shop.FURNACE[1] <= highestPoints)){
+        const btn = document.createElement('button')
+        btn.className = Shop.FURNACE[0] + " shop-button can-purchase"
+        
+        btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.FURNACE[0] + "\")")
+        btn.style.backgroundColor = "grey"
+
+        const text = document.createElement('div')
+        text.className = Shop.FURNACE[0] + " shop-button-hover-text shadows-into-light-regular"
+        text.innerHTML = "Furnace-" + Shop.FURNACE[1] + " Swords.<br /> +20 swords created by servants"
+        btn.appendChild(text)
+        shopDiv.appendChild(btn)
+        Shop.FURNACE[2] = true
+    }
 }
 
 const spawnEnemy = setInterval(trySpawningEnemy, 10000)
 
 function trySpawningEnemy(){
-    var randNum = Math.floor(Math.random()*100) + 1    //Math.floor(Math.random()*100) + 1 <-- replace 100 with this code to start spawning enemies
+    var randNum = Math.floor(Math.random()*100) + 1   //Math.floor(Math.random()*100) + 1 <-- replace 100 with this code to start spawning enemies
     console.log(randNum)
     if(randNum <=50){ 
         wavesSpawned++
@@ -233,7 +263,7 @@ function addParticle(){
     particle.className = "clicked-particle"
     const child = document.createElement('h1')
     child.className = "shadows-into-light-regular"
-    child.innerText = "+1"
+    child.innerText = "+" + pointsPerClick
     particle.appendChild(child)
 
     var left = 15 + (Math.random()*75)
@@ -328,6 +358,7 @@ function clickServant(button){
         progress.classList.remove("readyServant")
         progress.innerHTML = ""
         changePoints(Shop.SERVANT[5])
+        updateShop()
     } 
     if(!(classList.indexOf("workingServant") != -1)){
         servantAnimation(progress)

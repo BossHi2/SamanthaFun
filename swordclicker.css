@@ -5,7 +5,8 @@ body{
     user-select: none; /* Standard syntax */
     overflow-x: hidden;
     margin: 0;
-    padding: 0;background-color: rgb(173, 207, 173);
+    padding: 0;
+    background-color: rgb(173, 207, 173);
 
 }
 html{
@@ -162,6 +163,7 @@ html{
     overflow-x: hidden;
     background-color: rgb(173, 207, 173);
     height: 900px;
+    position: relative;
 }
 
 .game-over-text{
