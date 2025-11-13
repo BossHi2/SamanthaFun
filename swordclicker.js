@@ -5,15 +5,17 @@ const servantWrapper = document.getElementsByClassName("servant-wrapper")[0]
 const gameWrapper = document.getElementsByClassName("game-wrapper")[0]
 const ground = document.getElementsByClassName("ground")[0]
 const treasure = document.getElementsByClassName("treasure")[0]
+const timer = document.getElementsByClassName("timerText")[0]
 
 var points = 0
 var highestPoints = points
 var wavesSpawned = 0
 var pointsPerClick = 1;
 
-var displayHeight = 900
+var displayHeight = 1000
 
-// rather than making enemy spawning random, make it happen once a minute. Add a countdown at the top (TIME UNTIL NEXT WAVE: x SECONDS)
+var secondsCountdown = 30
+//when i increase the field, the yellow bar disappears
 
 var Shop = {    //[name, cost, hasUnlocked, owned, total, points per sword/ * x points per click, swords per x seconds]
     SERVANT: ['servant', 20, false, 0, 5, 30, 10],
@@ -186,37 +188,47 @@ function updateShop(){
     }
 }
 
-const spawnEnemy = setInterval(trySpawningEnemy, 10000)
+//const spawnEnemy = setInterval(trySpawningEnemy, 10000)
 
-function trySpawningEnemy(){
-    var randNum = Math.floor(Math.random()*100) + 1   //Math.floor(Math.random()*100) + 1 <-- replace 100 with this code to start spawning enemies
-    console.log(randNum)
-    if(randNum <=50){ 
-        wavesSpawned++
-        var numOfEnemies =  wavesSpawned;
+function spawnEnemy(){
+    wavesSpawned++
+    var numOfEnemies =  wavesSpawned * 2;
 
-        for(i=0; i<numOfEnemies; i++){
-            var parent = document.createElement("div")
-            parent.className = "enemy-wrapper"
-            var h1 = document.createElement("h1")
-            h1.className = "enemy-cost"
-            var randomCost = Math.floor(Math.random()*(highestPoints*.25)) + 5
-            h1.innerHTML = randomCost + " Swords"
-            var btn  =document.createElement("button")
-            btn.className = "enemy"
-            btn.setAttribute("onclick", "clickEnemy(this, " + randomCost + ")")
-    
-            parent.appendChild(h1)
-            parent.appendChild(btn)
+    for(i=0; i<numOfEnemies; i++){
+        var parent = document.createElement("div")
+        parent.className = "enemy-wrapper"
+        var h1 = document.createElement("h1")
+        h1.className = "enemy-cost"
+        var randomCost = Math.floor(Math.random()*(highestPoints*.25)) + 5
+        h1.innerHTML = randomCost + " Swords"
+        var btn  =document.createElement("button")
+        btn.className = "enemy"
+        btn.setAttribute("onclick", "clickEnemy(this, " + randomCost + ")")
 
-            parent.style.zIndex = 99999999
-            document.body.appendChild(parent)
-    
-            moveEnemy(parent, randomCost)
-        }
+        parent.appendChild(h1)
+        parent.appendChild(btn)
+
+        parent.style.zIndex = 99999999
+        document.body.appendChild(parent)
+
+        moveEnemy(parent, randomCost)
         
     }
 }
+
+function updateTimer() {
+    secondsCountdown--
+    timer.innerHTML = "Seconds until next wave: " + secondsCountdown
+    
+    if(secondsCountdown <= 0){
+        secondsCountdown = 30
+        spawnEnemy()
+    }
+}
+
+let timerInterval = setInterval(updateTimer, 1000);
+
+
 function reachedBottom(enemy, cost){
     if(document.body.contains(enemy)){
         enemy.remove()
@@ -401,7 +413,7 @@ function changePoints(p){
 
 function gameOver(){
     gameWrapper.remove()
-    clearInterval(spawnEnemy)
+    clearInterval(timerInterval)
     var elem = document.createElement("div")
     elem.className = "game-over-text shadows-into-light-regular"
     elem.innerHTML = "GAME OVER<br/>You ran out of swords!"
