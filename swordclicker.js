@@ -6,16 +6,17 @@ const gameWrapper = document.getElementsByClassName("game-wrapper")[0]
 const ground = document.getElementsByClassName("ground")[0]
 const treasure = document.getElementsByClassName("treasure")[0]
 const timer = document.getElementsByClassName("timerText")[0]
+const waveText = document.getElementsByClassName("waveText")[0]
 
 var points = 0
 var highestPoints = points
 var wavesSpawned = 0
 var pointsPerClick = 1;
 
-var displayHeight = 1000
+var displayHeight = 900
 
-var secondsCountdown = 30
-//when i increase the field, the yellow bar disappears
+var secondsCountdown = 20
+var timeBetweenWaves = secondsCountdown
 
 var Shop = {    //[name, cost, hasUnlocked, owned, total, points per sword/ * x points per click, swords per x seconds]
     SERVANT: ['servant', 20, false, 0, 5, 30, 10],
@@ -26,6 +27,7 @@ var Shop = {    //[name, cost, hasUnlocked, owned, total, points per sword/ * x 
     FURNACE: ['furnace', 300, false, 0, 1, 0, 0]
     //a cannon that does a bit of damage to the baloons- 400
     //autoclicker for sword- 500
+    //increase servant speed
 }
 
 
@@ -67,7 +69,6 @@ function shopButtonClicked(btnType){
         
         displayHeight += 200
         gameWrapper.style.height = displayHeight + "px"
-        treasure.style.bottom = "-200px"
         Shop.FIELD[3] += 1
 
         const button = document.getElementsByClassName(btnType + " shop-button")[0]
@@ -192,14 +193,17 @@ function updateShop(){
 
 function spawnEnemy(){
     wavesSpawned++
-    var numOfEnemies =  wavesSpawned * 2;
-
+    if(wavesSpawned %5 == 0){
+        timeBetweenWaves += 5
+    }
+    var numOfEnemies =  wavesSpawned * 2; //wavesSpawned * 2
+    waveText.innerHTML = "Waves Survived: " + wavesSpawned
     for(i=0; i<numOfEnemies; i++){
         var parent = document.createElement("div")
         parent.className = "enemy-wrapper"
         var h1 = document.createElement("h1")
         h1.className = "enemy-cost"
-        var randomCost = Math.floor(Math.random()*(highestPoints*.25)) + 5
+        var randomCost = Math.floor(Math.random()*(wavesSpawned*10)) + 5
         h1.innerHTML = randomCost + " Swords"
         var btn  =document.createElement("button")
         btn.className = "enemy"
@@ -221,7 +225,7 @@ function updateTimer() {
     timer.innerHTML = "Seconds until next wave: " + secondsCountdown
     
     if(secondsCountdown <= 0){
-        secondsCountdown = 30
+        secondsCountdown = timeBetweenWaves
         spawnEnemy()
     }
 }

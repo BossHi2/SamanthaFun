@@ -14,27 +14,27 @@ html{
     margin: 0;
 }
 .sword{
-    width: 400px;
-    height: 400px;
+    width: 200px;
+    height: 200px;
     position: absolute;
     z-index: 10000;
     background-image: url("sword.png");
     background-position:60%;
-    background-size: 400px;
+    background-size: 200px;
     background-color: transparent;
     border: none;
     transition:50ms;
     left: 50%;
-    top: 30%;
+    top: 0%;
     transform: translate(-50%, -50%);
 }
 .sword:hover{
     cursor: pointer;
-    height: 400px;
+    height: 200px;
 }
 .sword-wrapper{
     position: relative;
-    height: 400px;
+    height: 200px;
 }
 
 .clicked-particle{
@@ -162,7 +162,7 @@ html{
     overflow-y: hidden;
     overflow-x: hidden;
     background-color: rgb(173, 207, 173);
-    height: 1000px;
+    height: 900px;
     position: relative;
 }
 
@@ -193,9 +193,9 @@ html{
     bottom: 0px;
     position: absolute;
 }
-.timer{
+.Information{
     position: relative;
 }
-.timer h1{
+.Information h1{
     text-align: center;
 }
