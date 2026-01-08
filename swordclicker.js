@@ -5,6 +5,7 @@ const servantWrapper = document.getElementsByClassName("servant-wrapper")[0]
 const gameWrapper = document.getElementsByClassName("game-wrapper")[0]
 const ground = document.getElementsByClassName("ground")[0]
 const treasure = document.getElementsByClassName("treasure")[0]
+const treasureText = document.getElementsByClassName("treasureText")[0]
 const timer = document.getElementsByClassName("timerText")[0]
 const waveText = document.getElementsByClassName("waveText")[0]
 
@@ -13,35 +14,48 @@ var highestPoints = points
 var wavesSpawned = 0
 var pointsPerClick = 1;
 
-var displayHeight = 900
+var displayHeight = 1000
+gameWrapper.style.height = displayHeight + "px"
 
 var secondsCountdown = 20
 var timeBetweenWaves = secondsCountdown
 
-var Shop = {    //[name, cost, hasUnlocked, owned, total, points per sword/ * x points per click, swords per x seconds]
-    SERVANT: ['servant', 20, false, 0, 5, 30, 10],
+var totalTreasure = 1000
+var currTreasure = 1000
+
+var autoClickerInterval = null
+
+var Shop = {    //[name, cost, hasUnlocked, owned, total, points per sword/ * x points per click/damage]
+    SERVANT: ['servant', 20, false, 0, 5, 30],
     MUD: ['mud', 100, false, 0, 1, 0, 0],
     BETTERSWORD:['better_sword', 100, false, 0, 1, 2],
-    FIELD: ['field', 150, false, 0, 1, 0, 0],
-    COLLECTOR: ['collector', 200, false, 0, 1, 0, 0],
-    FURNACE: ['furnace', 300, false, 0, 1, 0, 0]
-    //a cannon that does a bit of damage to the baloons- 400
-    //autoclicker for sword- 500
-    //increase servant speed
+    FIELD: ['field', 150, false, 0, 1, 0],
+    LASER: ['laserbeam', 150, false, 0, 1, 10, 10],   //the last value (LASER[6]) is the recharge time for the laser
+    LASERDAMAGE: ['damage', 175, false, 0, 1, 0],
+    COLLECTOR: ['collector', 200, false, 0, 1, 0],
+    FURNACE: ['furnace', 300, false, 0, 1, 0],
+    BETTERSWORD2: ['better_sword2', 300, false, 0, 1, 2],
+    AUTOCLICKER: ['autoclicker', 500, false, 0, 1, 2],   //AUTOCLICKER[5] is the clicks per second
+    AUTOCLICKER2: ['autoclicker2', 600, false, 0, 1, 1]
+    //miners find more treasure- SLOWLY. first field unlocks this. make a graphic that is placed in the dark forest to hint at the fact that you need to buy the field to discover new things
 }
+
 
 
 
 function shopButtonClicked(btnType){
     if((btnType == Shop.SERVANT[0]) && (points>=Shop.SERVANT[1]) && (Shop.SERVANT[3] < Shop.SERVANT[4])){
-        makeServant()
-        changePoints(-Shop.SERVANT[1])
-        const button = document.getElementsByClassName(btnType + " shop-button")[0]
-        button.classList.remove("can-purchase")
         Shop.SERVANT[3] += 1
+        if(Shop.SERVANT[3] == 1)
+            makeServant()
+        document.getElementById("servant img").setAttribute("src", Shop.SERVANT[3] + " servant.png")
+        changePoints(-Shop.SERVANT[1])
         Shop.SERVANT[1] *= 2
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        if(Shop.SERVANT[1] > points)
+            button.classList.remove("can-purchase")
         const txt = document.getElementsByClassName(btnType + " shop-button-hover-text")[0]
-        txt.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords.<br /> Generates " + Shop.SERVANT[5] + " swords per " + Shop.SERVANT[6] + " seconds <br />" + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
+        txt.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords." + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
 
 
         if(Shop.SERVANT[3] == Shop.SERVANT[4]){
@@ -67,9 +81,38 @@ function shopButtonClicked(btnType){
     if((btnType == Shop.FIELD[0]) && (points>=Shop.FIELD[1])){
         changePoints(-Shop.FIELD[1])
         
-        displayHeight += 200
+        displayHeight += 300
         gameWrapper.style.height = displayHeight + "px"
         Shop.FIELD[3] += 1
+
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        button.remove()
+    }
+    if((btnType == Shop.LASER[0]) && (points>=Shop.LASER[1])){
+        changePoints(-Shop.LASER[1])
+
+        var laserDiv = document.createElement("div")
+        laserDiv.classList.add("laser")
+        var laserProgBar = document.createElement("div")
+        laserProgBar.classList.add("laser-progressBar")
+        laserDiv.appendChild(laserProgBar)
+        
+        gameWrapper.appendChild(laserDiv)
+
+        Shop.LASER[3] += 1
+
+
+        let laserTimer = setInterval(function(){ laserRecharge(laserProgBar)}, 1000)
+
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        button.remove()
+    }
+    if((btnType == Shop.LASERDAMAGE[0]) && (points>=Shop.LASERDAMAGE[1])){
+        changePoints(-Shop.LASERDAMAGE[1])
+
+        Shop.LASER[5] *= 2
+
+        Shop.LASERDAMAGE[3] += 1
 
         const button = document.getElementsByClassName(btnType + " shop-button")[0]
         button.remove()
@@ -92,7 +135,37 @@ function shopButtonClicked(btnType){
         const button = document.getElementsByClassName(btnType + " shop-button")[0]
         button.remove()
     }
+    if((btnType == Shop.BETTERSWORD2[0]) && (points>=Shop.BETTERSWORD2[1])){
+        changePoints(-Shop.BETTERSWORD2[1])
+
+        Shop.BETTERSWORD2[3] += 1
+        pointsPerClick *= Shop.BETTERSWORD2[5]
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        button.remove()
+    }
+    if((btnType == Shop.AUTOCLICKER[0]) && (points>=Shop.AUTOCLICKER[1])){
+        changePoints(-Shop.AUTOCLICKER[1])
+        Shop.AUTOCLICKER[3] += 1
+        autoClickerInterval = setInterval(swordClicked, Shop.AUTOCLICKER[5]*1000)
+
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        button.remove()
+    }
+    if((btnType == Shop.AUTOCLICKER2[0]) && (points>=Shop.AUTOCLICKER2[1])){
+        changePoints(-Shop.AUTOCLICKER2[1])
+        Shop.AUTOCLICKER2[3] += 1
+
+        clearInterval(autoClickerInterval)
+        autoClickerInterval = setInterval(swordClicked, Shop.AUTOCLICKER2[5]*1000)
+
+        const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        button.remove()
+    }
+
+    updateShop()
 }
+
+
 
 function swordClicked(){
     changePoints(pointsPerClick)
@@ -104,22 +177,32 @@ function swordClicked(){
 }
 
 function updateShop(){
-    if((Shop.SERVANT[2] == false) && (Shop.SERVANT[1] <= highestPoints)){
+    var threshhold = highestPoints + 100
+    if((Shop.SERVANT[2] == false) && (Shop.SERVANT[1] <= threshhold)){
         const btn = document.createElement('button')
-        btn.className = Shop.SERVANT[0] + " shop-button can-purchase"
+        if(Shop.SERVANT[1] <= points){
+            btn.className = Shop.SERVANT[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.SERVANT[0] + " shop-button"
+        }
+        
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.SERVANT[0] + "\")")
         btn.style.backgroundImage = "url(\"Servant Button Bg.png\")"
 
         const text = document.createElement('div')
         text.className = Shop.SERVANT[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords.<br /> Generates " + Shop.SERVANT[5] + " swords per " + Shop.SERVANT[6] + " seconds <br />" + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
+        text.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords." + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.SERVANT[2] = true
     }
-    if( (Shop.MUD[2] == false) && (Shop.MUD[1] <= highestPoints)){
+    if( (Shop.MUD[2] == false) && (Shop.MUD[1] <= threshhold)){
         const btn = document.createElement('button')
-        btn.className = Shop.MUD[0] + " shop-button can-purchase"
+        if(Shop.MUD[1] <= points){
+            btn.className = Shop.MUD[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.MUD[0] + " shop-button"
+        }
         
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.MUD[0] + "\")")
         btn.style.backgroundColor = "brown"
@@ -131,9 +214,13 @@ function updateShop(){
         shopDiv.appendChild(btn)
         Shop.MUD[2] = true
     }
-    if( (Shop.BETTERSWORD[2] == false) && (Shop.BETTERSWORD[1] <= highestPoints)){
+    if( (Shop.BETTERSWORD[2] == false) && (Shop.BETTERSWORD[1] <= threshhold)){
         const btn = document.createElement('button')
-        btn.className = Shop.BETTERSWORD[0] + " shop-button can-purchase"
+        if(Shop.BETTERSWORD[1] <= points){
+            btn.className = Shop.BETTERSWORD[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.BETTERSWORD[0] + " shop-button"
+        }
 
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.BETTERSWORD[0] + "\")")
         btn.style.backgroundColor = "blue"
@@ -145,23 +232,67 @@ function updateShop(){
         shopDiv.appendChild(btn)
         Shop.BETTERSWORD[2] = true
     }
-    if( (Shop.FIELD[2] == false) && (Shop.FIELD[1] <= highestPoints)){
+    if( (Shop.FIELD[2] == false) && (Shop.FIELD[1] <= threshhold)){
         const btn = document.createElement('button')
-        btn.className = Shop.FIELD[0] + " shop-button can-purchase"
+        if(Shop.FIELD[1] <= points){
+            btn.className = Shop.FIELD[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.FIELD[0] + " shop-button"
+        }
         
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.FIELD[0] + "\")")
         btn.style.backgroundColor = "green"
 
         const text = document.createElement('div')
         text.className = Shop.FIELD[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Field-" + Shop.FIELD[1] + " Swords.<br /> Increases field by 200 pixels"
+        text.innerHTML = "Field-" + Shop.FIELD[1] + " Swords.<br /> Increases field by 300 pixels"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.FIELD[2] = true
     }
-    if( (Shop.COLLECTOR[2] == false) && (Shop.COLLECTOR[1] <= highestPoints)){
+    if( (Shop.LASER[2] == false) && (Shop.LASER[1] <= threshhold)){
         const btn = document.createElement('button')
-        btn.className = Shop.COLLECTOR[0] + " shop-button can-purchase"
+        if(Shop.LASER[1] <= points){
+            btn.className = Shop.LASER[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.LASER[0] + " shop-button"
+        }
+        
+        btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.LASER[0] + "\")")
+        btn.style.backgroundColor = "blue"
+
+        const text = document.createElement('div')
+        text.className = Shop.LASER[0] + " shop-button-hover-text shadows-into-light-regular"
+        text.innerHTML = "Laser-" + Shop.LASER[1] + " Swords.<br /> Deals " + Shop.LASER[5] + " damage to enemies"
+        btn.appendChild(text)
+        shopDiv.appendChild(btn)
+        Shop.LASER[2] = true
+    }
+    if( (Shop.LASER[3] > 0) && (Shop.LASERDAMAGE[2] == false) && (Shop.LASERDAMAGE[1] <= threshhold)){
+        const btn = document.createElement('button')
+        if(Shop.LASERDAMAGE[1] <= points){
+            btn.className = Shop.LASERDAMAGE[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.LASERDAMAGE[0] + " shop-button"
+        }
+        
+        btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.LASERDAMAGE[0] + "\")")
+        btn.style.backgroundColor = "blue"
+
+        const text = document.createElement('div')
+        text.className = Shop.LASERDAMAGE[0] + " shop-button-hover-text shadows-into-light-regular"
+        text.innerHTML = "Laser Upgrade-" + Shop.LASERDAMAGE[1] + " Swords.<br /> Doubles laser damage"
+        btn.appendChild(text)
+        shopDiv.appendChild(btn)
+        Shop.LASERDAMAGE[2] = true
+    }
+    if( (Shop.SERVANT[3] > 0) && (Shop.COLLECTOR[2] == false) && (Shop.COLLECTOR[1] <= threshhold)){
+        const btn = document.createElement('button')
+        if(Shop.COLLECTOR[1] <= points){
+            btn.className = Shop.COLLECTOR[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.COLLECTOR[0] + " shop-button"
+        }
         
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.COLLECTOR[0] + "\")")
         btn.style.backgroundColor = "grey"
@@ -173,41 +304,99 @@ function updateShop(){
         shopDiv.appendChild(btn)
         Shop.COLLECTOR[2] = true
     }
-    if( (Shop.FURNACE[2] == false) && (Shop.FURNACE[1] <= highestPoints)){
+    if( (Shop.SERVANT[3] > 0) && (Shop.FURNACE[2] == false) && (Shop.FURNACE[1] <= threshhold)){
         const btn = document.createElement('button')
-        btn.className = Shop.FURNACE[0] + " shop-button can-purchase"
+        if(Shop.FURNACE[1] <= points){
+            btn.className = Shop.FURNACE[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.FURNACE[0] + " shop-button"
+        }
         
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.FURNACE[0] + "\")")
         btn.style.backgroundColor = "grey"
 
         const text = document.createElement('div')
         text.className = Shop.FURNACE[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Furnace-" + Shop.FURNACE[1] + " Swords.<br /> +20 swords created by servants"
+        text.innerHTML = "Furnace-" + Shop.FURNACE[1] + " Swords.<br /> Increase servant sword production"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.FURNACE[2] = true
     }
+    if( (Shop.BETTERSWORD2[2] == false) && (Shop.BETTERSWORD2[1] <= threshhold)){
+        const btn = document.createElement('button')
+        if(Shop.BETTERSWORD2[1] <= points){
+            btn.className = Shop.BETTERSWORD2[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.BETTERSWORD2[0] + " shop-button"
+        }
+
+        btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.BETTERSWORD2[0] + "\")")
+        btn.style.backgroundColor = "blue"
+
+        const text = document.createElement('div')
+        text.className = Shop.BETTERSWORD2[0] + " shop-button-hover-text shadows-into-light-regular"
+        text.innerHTML = "Better sword-" + Shop.BETTERSWORD2[1] + " Swords.<br /> Doubles the swords gained per click"
+        btn.appendChild(text)
+        shopDiv.appendChild(btn)
+        Shop.BETTERSWORD2[2] = true
+    }
+    if( (Shop.AUTOCLICKER[2] == false) && (Shop.AUTOCLICKER[1] <= threshhold)){
+        const btn = document.createElement('button')
+        if(Shop.AUTOCLICKER[1] <= points){
+            btn.className = Shop.AUTOCLICKER[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.AUTOCLICKER[0] + " shop-button"
+        }
+
+        btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.AUTOCLICKER[0] + "\")")
+        btn.style.backgroundColor = "blue"
+
+        const text = document.createElement('div')
+        text.className = Shop.AUTOCLICKER[0] + " shop-button-hover-text shadows-into-light-regular"
+        text.innerHTML = "Autoclicker-" + Shop.AUTOCLICKER[1] + " Swords.<br /> Clicks every 2 seconds"
+        btn.appendChild(text)
+        shopDiv.appendChild(btn)
+        Shop.AUTOCLICKER[2] = true
+    }
+
+    if( (Shop.AUTOCLICKER[3] > 0) && (Shop.AUTOCLICKER2[2] == false) && (Shop.AUTOCLICKER2[1] <= threshhold)){
+        const btn = document.createElement('button')
+        if(Shop.AUTOCLICKER2[1] <= points){
+            btn.className = Shop.AUTOCLICKER2[0] + " shop-button can-purchase"
+        } else{
+            btn.className = Shop.AUTOCLICKER2[0] + " shop-button"
+        }
+
+        btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.AUTOCLICKER2[0] + "\")")
+        btn.style.backgroundColor = "blue"
+
+        const text = document.createElement('div')
+        text.className = Shop.AUTOCLICKER2[0] + " shop-button-hover-text shadows-into-light-regular"
+        text.innerHTML = "Autoclicker-" + Shop.AUTOCLICKER2[1] + " Swords.<br /> Reduces time between clicks"
+        btn.appendChild(text)
+        shopDiv.appendChild(btn)
+        Shop.AUTOCLICKER2[2] = true
+    }
 }
 
-//const spawnEnemy = setInterval(trySpawningEnemy, 10000)
 
 function spawnEnemy(){
     wavesSpawned++
-    if(wavesSpawned %5 == 0){
+    if(wavesSpawned %2 == 0 && timeBetweenWaves < 40){
         timeBetweenWaves += 5
     }
-    var numOfEnemies =  wavesSpawned * 2; //wavesSpawned * 2
-    waveText.innerHTML = "Waves Survived: " + wavesSpawned
+    var numOfEnemies =  wavesSpawned * 2;
+    waveText.innerHTML = "Waves Survived: " + (wavesSpawned-1)
     for(i=0; i<numOfEnemies; i++){
         var parent = document.createElement("div")
         parent.className = "enemy-wrapper"
         var h1 = document.createElement("h1")
         h1.className = "enemy-cost"
-        var randomCost = Math.floor(Math.random()*(wavesSpawned*10)) + 5
+        var randomCost = Math.floor(Math.random()*(wavesSpawned*10)) + (wavesSpawned*5)
         h1.innerHTML = randomCost + " Swords"
         var btn  =document.createElement("button")
         btn.className = "enemy"
-        btn.setAttribute("onclick", "clickEnemy(this, " + randomCost + ")")
+        btn.setAttribute("onclick", "clickEnemy(this)")
 
         parent.appendChild(h1)
         parent.appendChild(btn)
@@ -230,44 +419,81 @@ function updateTimer() {
     }
 }
 
-let timerInterval = setInterval(updateTimer, 1000);
-
-
-function reachedBottom(enemy, cost){
-    if(document.body.contains(enemy)){
-        enemy.remove()
-        changePoints(-cost * 1.5)
-    }
-    
-}
+let timerInterval = setInterval(updateTimer, 1000); //uncomment this to start spawning enemies
 
 function moveEnemy(enemy, cost){
-    var leftVal = Math.floor(Math.random()*95) + 1
-    enemy.style.left = leftVal + "vw"
+    var leftValVW = Math.floor(Math.random()*95) + 1
+    enemy.style.left = document.documentElement.clientWidth * leftValVW * 0.01 + "px"
 
     var topVal = 0
     var id = null
     clearInterval(id)
+
+
     id = setInterval(moveEnemyFunc, 10)
 
+
+    var servantLeft = servantWrapper.getBoundingClientRect().left
+    var servantRight = servantWrapper.getBoundingClientRect().right
+    var servantTop = servantWrapper.getBoundingClientRect().top + window.scrollY;
+    var servantBottom = servantWrapper.getBoundingClientRect().bottom +window.scrollY;
+
+    var enemyLeft = enemy.getBoundingClientRect().left
+    var enemyRight = enemy.getBoundingClientRect().right
+
+
     function moveEnemyFunc(){
-        if(topVal >= displayHeight){
-            reachedBottom(enemy, cost)
-            clearInterval(id)
-        } else{
-            if(Shop.MUD[3]>0 && topVal >= 300 && topVal <= 400){
-                topVal += 0.25
-                enemy.style.top = topVal + "px"
+        
+        if(document.contains(enemy)){
+            if(topVal >= (displayHeight-120)){
+                    enemy.remove()
+                    currTreasure -= cost
+                    treasureText.innerHTML = currTreasure + "/" + totalTreasure + " Gold"
+                    if(currTreasure <= 0){
+                        gameOver()
+                    }
+                    clearInterval(id)
             } else{
-                topVal += 1
-                enemy.style.top = topVal + "px"
+                
+                var enemyTop = enemy.getBoundingClientRect().top + window.scrollY;
+                var enemyBottom = enemy.getBoundingClientRect().bottom + window.scrollY;
+                
+
+                if (Shop.SERVANT[3]>0 && !(enemyRight < servantLeft || enemyLeft > servantRight || enemyBottom< servantTop || enemyTop > servantBottom)){
+                    var progClassList = document.getElementById("progress-1").classList + ""
+                    if(progClassList.indexOf("destroyed") == -1){
+                        document.getElementById("progress-1").classList.add("destroyed")
+                        enemy.remove()
+                        clearInterval(id)
+                    }
+
+                        
+                }
+                if(Shop.LASER[3]>0 && document.getElementsByClassName("laserDamage").length != 0 && (!enemy.classList.contains("damagedByLaser")) && enemyBottom >= 290 && enemyBottom <= 360){
+                    enemy.classList.add("damagedByLaser")
+                    cost -= Shop.LASER[5]
+                    if(cost <= 0){
+                        enemy.remove()
+                        clearInterval(id)
+                    }  
+                    enemy.getElementsByClassName('enemy-cost')[0].innerHTML = cost + " Swords"
+                }
+                if(Shop.MUD[3]>0 && enemyBottom >= 300 && enemyBottom <= 460){
+                    topVal += 0.25
+                    enemy.style.top = topVal + "px"
+                } else{
+                    topVal += 1
+                    enemy.style.top = topVal + "px"
+                }
             }
-            
         }
     }
+        
 }
 
-function clickEnemy(button, cost){
+function clickEnemy(button){
+    var enemy = button.parentNode
+    var cost = parseInt(enemy.getElementsByClassName('enemy-cost')[0].innerText.substring(0, enemy.getElementsByClassName('enemy-cost')[0].innerText.length-7))
     if(points >= cost){
         button.parentNode.remove()
         changePoints(-cost)
@@ -320,7 +546,8 @@ function makeServant(){
     btn.className = "servant-button"
     btn.setAttribute("id", Shop.SERVANT[3])
     var img = document.createElement("img")
-    img.setAttribute("src", "Smelting Sword.png")
+    img.setAttribute("src", Shop.SERVANT[3] + " servant.png")
+    img.setAttribute("id", "servant img")
     var progress = document.createElement("div")
     progress.className = "progress-bar shadows-into-light-regular"
     progress.setAttribute("id", "progress-" + Shop.SERVANT[3])
@@ -330,16 +557,14 @@ function makeServant(){
     parent.appendChild(img)
     
     parent.style.position = "relative"
-    parent.setAttribute("id", "servant-" + Shop.SERVANT[3])
+    parent.setAttribute("id", "servant")
     servantWrapper.appendChild(parent)
 
     servantAnimation(progress)
 }
 
 
-
 function servantAnimation(progressBar){
-    progressBar.style.height = "0px"
     var size = 0
     var id = null
     clearInterval(id)
@@ -348,8 +573,19 @@ function servantAnimation(progressBar){
     progressBar.classList.add("workingServant")
 
     function growProgress(){
-        if(size == (100)){
-
+        classList = progressBar.classList + ""
+        if(classList.indexOf("destroyed") != -1){
+            size = 0
+            progressBar.style.width = size + "px"
+            document.getElementById("servant img").setAttribute("src", "destroyed.png")
+            var btn = document.createElement("button")
+            btn.className = "destroyed-button"
+            btn.innerHTML = "REPAIR- 100 swords"
+            btn.setAttribute("onclick", "repairServant()")
+            servantWrapper.appendChild(btn)
+            clearInterval(id)
+        }
+        if(size == (200)){
             progressBar.innerHTML = Shop.SERVANT[5] + " swords"
             progressBar.classList.remove("workingServant")
             progressBar.classList.add("readyServant")
@@ -357,13 +593,82 @@ function servantAnimation(progressBar){
             if(Shop.COLLECTOR[3] != 0){
                 clickServant(progressBar.nextSibling)
             }
-            
             clearInterval(id)
+            
         } else{
-            size+=1 * (100/(Shop.SERVANT[6]*10));
-            progressBar.style.height = size + "px"
+            size+=exponentialGrowth(Shop.SERVANT[3]);
+            if(size > 200)
+                size=200
+            progressBar.style.width = size + "px"
+        }
+        
+    }
+}
+
+function repairServant(){
+    if(points >= 100){
+        changePoints(-100)
+        document.getElementById("servant img").setAttribute("src", Shop.SERVANT[3] + " servant.png")
+        var progBar = document.getElementById("progress-1")
+        progBar.classList.remove("destroyed")
+        document.getElementsByClassName("destroyed-button")[0].remove()
+        servantAnimation(progBar)
+    }
+}
+
+
+
+
+
+function laserRecharge(laserProgBar){
+    if(document.getElementsByClassName("laserDamage").length == 0 && document.getElementsByClassName("activateLaser").length == 0){
+        laserProgBar.style.width = 50/Shop.LASER[6] + laserProgBar.getBoundingClientRect().width + "px"
+        if(laserProgBar.getBoundingClientRect().width >= 50){
+            laserProgBar.style.width = "0px"
+
+            var btn = document.createElement("button")
+            btn.classList.add("activateLaser")
+            btn.innerHTML = "Shoot Laser!"
+            btn.setAttribute('onclick', "shootLaser(this)")
+
+            document.getElementsByClassName("laser")[0].appendChild(btn)
+
+
+            var enemies = document.getElementsByClassName("enemy-wrapper")
+            for(const e of enemies){
+                e.classList.remove("damagedByLaser")
+            }
         }
     }
+    
+}
+
+
+
+function shootLaser(button){
+    var beam = document.createElement("div")
+    beam.classList.add("laserDamage")
+    document.getElementsByClassName("laser")[0].appendChild(beam)
+    button.remove()
+
+
+    var timer = 0
+    var id = null
+    clearInterval(id)
+
+    id = setInterval(shootBeam, 500)
+    
+    function shootBeam(){
+        if(timer == .5){
+            beam.remove()
+            clearInterval(id)
+        }
+        timer += .5
+    }
+}
+
+function exponentialGrowth(x){
+    return Math.pow(2,x);
 }
 
 function clickServant(button){
@@ -376,16 +681,14 @@ function clickServant(button){
         changePoints(Shop.SERVANT[5])
         updateShop()
     } 
-    if(!(classList.indexOf("workingServant") != -1)){
+    if(classList.indexOf("workingServant") == -1){
         servantAnimation(progress)
     }
 }
 
 function changePoints(p){
-    points += Math.max(p)
-    if(points < 0){
-        gameOver()
-    }
+    points += Math.round(p)
+    
     if(highestPoints < points)
         highestPoints = points
     pointDisplay.innerHTML = "Swords: " + points
@@ -420,7 +723,7 @@ function gameOver(){
     clearInterval(timerInterval)
     var elem = document.createElement("div")
     elem.className = "game-over-text shadows-into-light-regular"
-    elem.innerHTML = "GAME OVER<br/>You ran out of swords!"
+    elem.innerHTML = "GAME OVER<br/>Your enemies took all the treasure!<br/>You survived " + (wavesSpawned-1) + " waves"
     document.body.appendChild(elem)
 }
 

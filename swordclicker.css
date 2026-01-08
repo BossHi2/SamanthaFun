@@ -6,8 +6,8 @@ body{
     overflow-x: hidden;
     margin: 0;
     padding: 0;
-    background-color: rgb(173, 207, 173);
-
+    height: 2000px;
+    background-image:url("unlocked\ land\ tile.png");
 }
 html{
     overflow-x: hidden;
@@ -17,7 +17,7 @@ html{
     width: 200px;
     height: 200px;
     position: absolute;
-    z-index: 10000;
+    z-index: 99;
     background-image: url("sword.png");
     background-position:60%;
     background-size: 200px;
@@ -34,19 +34,14 @@ html{
 }
 .sword-wrapper{
     position: relative;
-    height: 200px;
+    height: 150px;
 }
 
 .clicked-particle{
     position: absolute;
 }
 
-.point-display{
-    text-align: center;
-    font-size: 100px;
-    position: relative;
-    top: -10vh;
-}
+
 
 .shop{
     position: relative;
@@ -92,58 +87,76 @@ html{
 }
 
 .servant-wrapper{
-    width: 100vw;
-    left: 3vw;
-    position: relative;
-    height: 100px;
-    display: grid;
-    grid-template-columns: 20% 20% 20% 20% 20%;
+    width: 200px;
+    left: 50%;
+    transform:translate(-50%,0);
+    position: absolute;
+    height: 200px;
+    top: 700px;
 }
 .servant img{
-    height: 100px;
+    height: 200px;
 }
+
+
 
 .servant button{
     background-color: transparent;
     border: none;
     position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
     z-index: 1;
 }
 
 .servant button:hover{
     cursor: pointer;
-    background-color: rgba(150, 150, 150, 0.347);
 }
 
 .progress-bar{
     background-color: rgba(150, 150, 150, 0.347);
-    width: 100px;
-    height: 0px;
+    width: 20px;
+    height: 35px;
     position: absolute;
-    bottom: 5px;
+    top: -30px;
     text-align: center;
-    font-size: 30px;
+    font-size: 25px;
 }
 .readyServant {
-    background-color: rgba(255, 255, 0, 0.413);
+    background-color: rgba(255, 255, 0, 1);
+}
+
+.destroyed-button{
+    width: 150px;
+    height: 50px;
+    left: 25px;
+    top: 50%;
+    position: absolute;
+    background-color: red;
+    border: none;
+    border-radius: 10px;
+    z-index: 1;
+
+}
+.destroyed-button:hover{
+    background-color: rgb(132, 0, 0);
+    cursor: pointer;
 }
 
 .enemy-wrapper{
     top: 0;
     animation-fill-mode: forwards;
     position: absolute;
-    z-index: 100;
+    z-index: 101;
     width: max-content;
     height: 80px;
     width: max-content;
 }
 .enemy{
     position: absolute;
-    width: 50px;
-    height: 100px;
-    background-image: url("balloon.png");
+    width: 60px;
+    height: 60px;
+    background-image: url("enemy.png");
     border: none;
     background-color: transparent;
     bottom: 0;
@@ -154,16 +167,24 @@ html{
 .enemy-cost{
     position: absolute;
     width: max-content;
-    top: -50px;
+    top: 0px;
     font-size: 15px;
+    color: black;
+    text-shadow:
+    -1px -1px 0 #ffffff,
+    1px -1px 0 #ffffff,
+    -1px 1px 0 #ffffff,
+    1px 1px 0 #ffffff;  
 }
 
 .game-wrapper{
     overflow-y: hidden;
     overflow-x: hidden;
-    background-color: rgb(173, 207, 173);
+    background-image: url(grass.png);
+    background-attachment:scroll;
     height: 900px;
     position: relative;
+    
 }
 
 .game-over-text{
@@ -173,12 +194,16 @@ html{
     top: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+    color: white;
+    z-index: 99999;
 }
 
 .mud-obstacle{
     height: 100px;
     width: 100vw;
-    background-color: brown;
+    background-image: url(mud.png);
+    background-size: contain;
+    
     position: absolute;
     z-index: 1;
     top: 300px;
@@ -187,15 +212,94 @@ html{
 
 
 .treasure{
-    background-color: yellow;
+    background-image: url(treasure.png);
+
     height: 50px;
     width: 100vw;
     bottom: 0px;
     position: absolute;
+    padding-bottom: 20px;
 }
-.Information{
-    position: relative;
-}
-.Information h1{
+.treasureText{
     text-align: center;
+    font-size: 30px;
+    color: white;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;  
+}
+
+.Information{
+    position:absolute;
+    top: 650px;
+    left: 3vw;
+    margin: 2vw;
+    padding: 1vw;
+    height: max-content;
+    width: 300px;
+}
+    
+.Information h1{
+    text-align: left;
+    font-size: x-large;
+    position: relative;
+    z-index: 1;
+    top: 30px;
+    left: 30px;
+}
+
+.point-display{
+    text-align: center;
+    font-size: 100px;
+    position: relative;
+    top: -10vh;
+}
+
+.Information img{
+    position: absolute;
+    width: 350px;
+    top: 0px;
+}
+
+.laser{
+    position: absolute;
+    top: 275px;
+    height: 40px;
+    width: 50px;
+    background-image: url(laser.png);
+    background-size: contain;
+    border: none;
+    z-index: 102;
+}
+.laser :hover{
+    cursor: pointer;
+}
+.laserDamage{
+    position: absolute;
+    height: 20px;
+    width: 100vw;
+    background-image: url(laserbeam.png);
+    background-size: contain;
+    background-repeat: repeat;
+    top: 10px;
+    left: 50px;
+    z-index: 101;
+    border-radius: 20px;
+}
+.laser-progressBar{
+    position: absolute;
+    height: 40px;
+    width: 0px;
+    top: 0;
+    left: 0;
+    background-color: rgba(150, 150, 150, 0.347);
+}
+
+.activateLaser{
+    top: 50%;
+    transform: translate(0,-50%);
+    left: 55px;
+    position: relative;
 }
