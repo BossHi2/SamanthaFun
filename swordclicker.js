@@ -76,6 +76,7 @@ function shopButtonClicked(btnType){
         changePoints(-Shop.BETTERSWORD[1])
         pointsPerClick *= Shop.BETTERSWORD[5]
         const button = document.getElementsByClassName(btnType + " shop-button")[0]
+        sword.style.backgroundImage = "url(\"BetterSword.png\")"
         button.remove()
     }
     if((btnType == Shop.FIELD[0]) && (points>=Shop.FIELD[1])){
@@ -170,8 +171,6 @@ function shopButtonClicked(btnType){
 function swordClicked(){
     changePoints(pointsPerClick)
 
-    addParticle()
-
     updateShop()
     
 }
@@ -191,7 +190,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.SERVANT[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords." + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
+        text.innerHTML = "Servant-" + Shop.SERVANT[1] + " Swords <br>" + Shop.SERVANT[3] +"/" + Shop.SERVANT[4] + " unlocked"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.SERVANT[2] = true
@@ -205,11 +204,11 @@ function updateShop(){
         }
         
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.MUD[0] + "\")")
-        btn.style.backgroundColor = "brown"
+        btn.style.backgroundImage = "url(\"Mud Button Bg.png\")"
 
         const text = document.createElement('div')
         text.className = Shop.MUD[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Mud-" + Shop.MUD[1] + " Swords.<br /> Slows enemy down"
+        text.innerHTML = "Mud-" + Shop.MUD[1] + " Swords"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.MUD[2] = true
@@ -223,11 +222,11 @@ function updateShop(){
         }
 
         btn.setAttribute('onclick', "shopButtonClicked(\"" + Shop.BETTERSWORD[0] + "\")")
-        btn.style.backgroundColor = "blue"
+        btn.style.backgroundImage = "url(\"BetterSword.png\")"
 
         const text = document.createElement('div')
         text.className = Shop.BETTERSWORD[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Better sword-" + Shop.BETTERSWORD[1] + " Swords.<br /> Doubles the swords gained per click"
+        text.innerHTML = "Better sword-" + Shop.BETTERSWORD[1] + " Swords.<br />"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.BETTERSWORD[2] = true
@@ -245,7 +244,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.FIELD[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Field-" + Shop.FIELD[1] + " Swords.<br /> Increases field by 300 pixels"
+        text.innerHTML = "Field-" + Shop.FIELD[1] + " Swords.<br />"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.FIELD[2] = true
@@ -263,7 +262,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.LASER[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Laser-" + Shop.LASER[1] + " Swords.<br /> Deals " + Shop.LASER[5] + " damage to enemies"
+        text.innerHTML = "Laser-" + Shop.LASER[1] + " Swords."
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.LASER[2] = true
@@ -281,7 +280,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.LASERDAMAGE[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Laser Upgrade-" + Shop.LASERDAMAGE[1] + " Swords.<br /> Doubles laser damage"
+        text.innerHTML = "Laser Upgrade-" + Shop.LASERDAMAGE[1] + " Swords"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.LASERDAMAGE[2] = true
@@ -299,7 +298,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.COLLECTOR[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Collector-" + Shop.COLLECTOR[1] + " Swords.<br /> Automatically collects servant's swords"
+        text.innerHTML = "Servant Collector-" + Shop.COLLECTOR[1] + " Swords"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.COLLECTOR[2] = true
@@ -317,7 +316,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.FURNACE[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Furnace-" + Shop.FURNACE[1] + " Swords.<br /> Increase servant sword production"
+        text.innerHTML = "Furnace-" + Shop.FURNACE[1] + " Swords"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.FURNACE[2] = true
@@ -353,7 +352,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.AUTOCLICKER[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Autoclicker-" + Shop.AUTOCLICKER[1] + " Swords.<br /> Clicks every 2 seconds"
+        text.innerHTML = "Autoclicker-" + Shop.AUTOCLICKER[1] + " Swordss"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.AUTOCLICKER[2] = true
@@ -372,7 +371,7 @@ function updateShop(){
 
         const text = document.createElement('div')
         text.className = Shop.AUTOCLICKER2[0] + " shop-button-hover-text shadows-into-light-regular"
-        text.innerHTML = "Autoclicker-" + Shop.AUTOCLICKER2[1] + " Swords.<br /> Reduces time between clicks"
+        text.innerHTML = "Autoclicker-" + Shop.AUTOCLICKER2[1] + " Swords"
         btn.appendChild(text)
         shopDiv.appendChild(btn)
         Shop.AUTOCLICKER2[2] = true
@@ -500,12 +499,12 @@ function clickEnemy(button){
     }
         
 }
-function addParticle(){
+function addParticle(amount){
     const particle = document.createElement('div')
     particle.className = "clicked-particle"
     const child = document.createElement('h1')
     child.className = "shadows-into-light-regular"
-    child.innerText = "+" + pointsPerClick
+    child.innerText = "+" + amount
     particle.appendChild(child)
 
     var left = 15 + (Math.random()*75)
@@ -694,6 +693,7 @@ function changePoints(p){
     pointDisplay.innerHTML = "Swords: " + points
 
     if(p>0){
+        addParticle(p)
         Object.values(Shop).forEach(shopArray => {
             if((shopArray[2] == true) && (shopArray[1] <= points)){
                 var button = document.getElementsByClassName(shopArray[0] + " shop-button")

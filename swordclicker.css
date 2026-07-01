@@ -14,7 +14,7 @@ html{
     margin: 0;
 }
 .sword{
-    width: 200px;
+    width: 112px;
     height: 200px;
     position: absolute;
     z-index: 99;
@@ -22,6 +22,7 @@ html{
     background-position:60%;
     background-size: 200px;
     background-color: transparent;
+    background-size: contain;
     border: none;
     transition:50ms;
     left: 50%;
@@ -77,9 +78,26 @@ html{
     background-color: white;
 }
 .shop-button-hover-text{
-    font-size: 15px;
+    height: 100%;
+    width: 100%;
+    font-size: 20px;
     display: none;
-    text-align: left;
+    text-align: center;
+}
+.shop .servant{
+    background-color: #a8804f;
+}
+.shop .better_sword{
+    background-color: rgb(226, 125, 125);
+}
+.shop button{
+    padding: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.shop .mud{
+    background-size: cover;
 }
 
 .can-purchase{
